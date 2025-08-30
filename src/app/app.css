@@ -1,0 +1,90 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  margin: 0 auto;
+  border: 3px solid red;
+}
+
+.settings {
+  display: flex;
+  margin: 0 auto;
+  padding: 1rem;
+  border: 3px solid blue;
+  gap: 10px;
+}
+
+.separator {
+  height: auto;
+  margin-inline: 1.5rem;
+  width: 5px;
+  background-color: black;
+}
+
+.filter {
+  display: flex;
+  flex-direction: column;
+}
+
+.log-level {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border: 3px solid green;
+  padding: 1rem;
+}
+
+.log-level-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  p {
+    margin-left: 1rem;
+  }
+}
+
+.source {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border: 3px solid green;
+  padding: 1rem;
+}
+
+.source-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  p {
+    margin-left: 1rem;
+  }
+}
+
+.toggle-label {
+  color: var(--text-color);
+}
+
+.log-display {
+  margin: 3rem;
+}
+
+.white-input-field {
+  /* Farbe für den eingegebenen Text */
+  --mdc-text-field-input-text-color: white;
+
+  /* Farbe für die Umrandung */
+  --mdc-text-field-outline-color: rgba(255, 255, 255, 0.7);
+
+  /* Farbe der Umrandung, wenn das Feld fokussiert ist */
+  --mdc-text-field-focused-outline-color: white;
+
+  /* Farbe für das Label (z.B. "Suche") */
+  --mdc-text-field-label-text-color: rgba(255, 255, 255, 0.7);
+  
+  /* Farbe des Labels, wenn das Feld fokussiert ist */
+  --mdc-text-field-focused-label-text-color: white;
+
+  /* Farbe für das Icon (Lupe, etc.) */
+  --mat-icon-color: rgba(255, 255, 255, 0.7);
+}
