@@ -122,7 +122,7 @@ tr:nth-child(even) {
       vertical-align: middle;
     }
 
-    &[data-level='E'] {
+    &[data-level='ERR'] {
       background-color: var(--error-color);
 
       &::before {
@@ -130,7 +130,7 @@ tr:nth-child(even) {
       }
     }
 
-    &[data-level='W'] {
+    &[data-level='WRN'] {
       background-color: var(--warning-color);
 
       &::before {
@@ -138,7 +138,7 @@ tr:nth-child(even) {
       }
     }
 
-    &[data-level='I'] {
+    &[data-level='INF'] {
       background-color: var(--info-color);
 
       &::before {
@@ -146,11 +146,27 @@ tr:nth-child(even) {
       }
     }
 
-    &[data-level='V'] {
+    &[data-level='VRB'] {
       background-color: var(--verbose-color);
 
       &::before {
         content: 'description';
+      }
+    }
+
+    &[data-level='DBG'] {
+      background-color: var(--verbose-color);
+
+      &::before {
+        content: 'bug_report';
+      }
+    }
+
+    &[data-level='FTL'] {
+      background-color: var(--error-color);
+
+      &::before {
+        content: 'report_problem';
       }
     }
   }

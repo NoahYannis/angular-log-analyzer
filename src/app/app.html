@@ -1,7 +1,7 @@
 <div class="container">
   <!-- Einstellungen (Filter, Log-Level, Quelle) -->
   <div class="settings">
-    <button mat-raised-button color="primary">
+    <button mat-raised-button color="primary" (click)="readLogFile()">
       <mat-icon>add</mat-icon>
       Log einlesen
     </button>
@@ -90,7 +90,7 @@
 
   <!--Log-Anzeige-->
   <div class="log-display">
-    <table mat-table [dataSource]="dataSource" class="mat-elevation-z8" matSort>
+    <table mat-table [dataSource]="logEntries" class="mat-elevation-z8" matSort>
       <ng-container matColumnDef="date">
         <th mat-header-cell *matHeaderCellDef mat-sort-header>Datum</th>
         <td mat-cell *matCellDef="let element">{{ element.date | date : 'dd.MM.yyyy' }}</td>

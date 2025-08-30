@@ -35,99 +35,78 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 })
 export class App implements AfterViewInit {
   protected readonly title = signal('angular-log-analyzer');
-
+  displayedColumns: string[] = ['date', 'time', 'level', 'source', 'message'];
+  logEntries = new MatTableDataSource<any>([]);
   @ViewChild(MatSort) sort!: MatSort;
 
-  displayedColumns: string[] = ['date', 'time', 'level', 'source', 'message'];
-  dataSource = new MatTableDataSource([
-    {
-      date: '2025-08-30',
-      time: '10:45:12',
-      level: 'I',
-      source: 'DAL',
-      message: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-    },
-    {
-      date: '2025-08-30',
-      time: '10:46:02',
-      level: 'W',
-      source: 'FW',
-      message: 'Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
-    },
-    {
-      date: '2025-08-30',
-      time: '10:47:33',
-      level: 'E',
-      source: 'CAD',
-      message:
-        'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
-    },
-    {
-      date: '2025-08-30',
-      time: '10:47:33',
-      level: 'V',
-      source: 'CAD',
-      message:
-        'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
-    },
-    {
-      date: '2025-08-30',
-      time: '10:47:33',
-      level: 'I',
-      source: 'CAD',
-      message:
-        'Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
-    },
-    {
-      date: '2025-08-30',
-      time: '10:47:33',
-      level: 'W',
-      source: 'CAD',
-      message:
-        'Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur.',
-    },
-    {
-      date: '2025-08-30',
-      time: '10:47:33',
-      level: 'E',
-      source: 'CAD',
-      message:
-        'At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.',
-    },
-    {
-      date: '2025-08-30',
-      time: '10:47:33',
-      level: 'V',
-      source: 'CAD',
-      message: 'Et harum quidem rerum facilis est et expedita distinctio.',
-    },
-    {
-      date: '2025-08-30',
-      time: '10:47:33',
-      level: 'I',
-      source: 'CAD',
-      message:
-        'Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat.',
-    },
-    {
-      date: '2025-08-30',
-      time: '10:47:33',
-      level: 'W',
-      source: 'CAD',
-      message:
-        'Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae.',
-    },
-    {
-      date: '2025-08-30',
-      time: '10:47:33',
-      level: 'E',
-      source: 'CAD',
-      message:
-        'Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur aut perferendis.',
-    },
-  ]);
+  readLogFile() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.txt,.log';
+    input.style.display = 'none';
+
+    input.addEventListener('change', (event: any) => {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const content = e.target?.result as string;
+          this.parseLogContent(content);
+        };
+        reader.readAsText(file);
+      }
+    });
+
+    document.body.appendChild(input);
+    input.click();
+    document.body.removeChild(input);
+  }
+
+  parseLogContent(content: string) {
+    // Datei in Zeilen aufteilen
+    const lines = content.split('\n');
+    console.log(`📄 Anzahl Zeilen: ${lines.length}`);
+
+    const parsedLogs = [];
+
+    // Der Regex-Ausdruck um die Einträge zu analysieren.
+    // Zuerst wird das Datum ermittelt (4 Zifern, Bindestrich, 2 Ziffern, Bindestrich, 2 Ziffern).
+    // Dann die Uhrzeit (2 Ziffern, Doppelpunkt, 2 Ziffern, Doppelpunkt, 2 Ziffern).
+    // Dann das Loglevel und die Quelle in eckigen Klammern.
+    // Schließlich der Inhalt mit ener beliebigen Zeichenanzahl (.+)
+    const logRegex = /^(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2}:\d{2})\s+\[(\w+)\]\s+\[(\w+)\]\s*(.+)$/;
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+
+      if (line === '') {
+        continue;
+      }
+
+      const match = line.match(logRegex);
+
+      if (match) {
+        const logEntry = {
+          date: match[1], // Datum
+          time: match[2], // Uhrzeit
+          level: match[3], // Level
+          source: match[4], // Anwendung
+          message: match[5].trim(), // Inhalt
+        };
+
+        parsedLogs.push(logEntry);
+      }
+    }
+
+    // Tabelle aktualisieren
+    if (parsedLogs.length > 0) {
+      this.logEntries.data = parsedLogs;
+    } else {
+      console.log('⚠️ Keine Log-Einträge gefunden.'); // TOOD: Snackbar anzeigen.
+    }
+  }
 
   ngAfterViewInit() {
-    this.dataSource.sort = this.sort;
+    this.logEntries.sort = this.sort;
   }
 }
