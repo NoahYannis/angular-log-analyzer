@@ -4,7 +4,9 @@
   --background-color: #1e1e1e;
   --text-color: #ffffff;
 }
-html, body {
+
+html,
+body {
   height: 100%;
   background-color: var(--background-color);
   color: var(--text-color);
@@ -12,5 +14,6 @@ html, body {
 
 body {
   margin: 0;
-  font-family: "Roboto", "Helvetica Neue", sans-serif; 
+  font-family: 'Roboto', 'Helvetica Neue', sans-serif;
+  font-size: 1rem;
 }
