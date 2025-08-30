@@ -8,6 +8,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-root',
@@ -21,6 +22,7 @@ import { MatTableModule } from '@angular/material/table';
     MatInputModule,
     MatIconModule,
     MatTableModule,
+    DatePipe,
   ],
   templateUrl: './app.html',
   styleUrl: './app.css',

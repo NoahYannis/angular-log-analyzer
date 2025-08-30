@@ -6,12 +6,12 @@
     <div class="filter">
       <h2>Filter</h2>
       <mat-form-field appearance="outline">
-        <mat-label>Einträge suchen</mat-label>
+        <mat-label>Suchen</mat-label>
         <input matInput type="text" />
         <mat-icon matSuffix>search</mat-icon>
       </mat-form-field>
       <mat-form-field appearance="outline">
-        <mat-label>Einträge ausschließen</mat-label>
+        <mat-label>Ausschließen</mat-label>
         <input matInput type="text"/>
         <mat-icon matSuffix>info</mat-icon>
       </mat-form-field>
@@ -83,7 +83,7 @@
     <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
       <ng-container matColumnDef="date">
         <th  mat-header-cell *matHeaderCellDef>Datum</th>
-        <td mat-cell *matCellDef="let element">{{ element.date }}</td>
+        <td mat-cell *matCellDef="let element">{{ element.date | date:'dd.MM.yyyy' }}</td>
       </ng-container>
 
       <ng-container matColumnDef="time">
