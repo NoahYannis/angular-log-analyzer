@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, ViewChild, AfterViewInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatChipsModule } from '@angular/material/chips';
@@ -8,7 +8,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { MatTableModule } from '@angular/material/table';
+import { MatTableModule, MatTableDataSource } from '@angular/material/table';
+import { MatSortModule, MatSort } from '@angular/material/sort';
 import { DatePipe } from '@angular/common';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
@@ -24,6 +25,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     MatInputModule,
     MatIconModule,
     MatTableModule,
+    MatSortModule,
     MatButtonModule,
     MatTooltipModule,
     DatePipe,
@@ -31,11 +33,13 @@ import { MatTooltipModule } from '@angular/material/tooltip';
   templateUrl: './app.html',
   styleUrl: './app.css',
 })
-export class App {
+export class App implements AfterViewInit {
   protected readonly title = signal('angular-log-analyzer');
 
+  @ViewChild(MatSort) sort!: MatSort;
+
   displayedColumns: string[] = ['date', 'time', 'level', 'source', 'message'];
-  dataSource = [
+  dataSource = new MatTableDataSource([
     {
       date: '2025-08-30',
       time: '10:45:12',
@@ -121,5 +125,9 @@ export class App {
       message:
         'Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur aut perferendis.',
     },
-  ];
+  ]);
+
+  ngAfterViewInit() {
+    this.dataSource.sort = this.sort;
+  }
 }

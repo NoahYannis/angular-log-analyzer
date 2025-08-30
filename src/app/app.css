@@ -70,12 +70,6 @@ button[mat-raised-button] {
   margin-top: 1rem;
 }
 
-.table-header {
-  margin-bottom: 1rem;
-  display: flex;
-  justify-content: flex-start;
-}
-
 .mat-mdc-table {
   border: 1px solid var(--text-color);
 }
@@ -87,6 +81,7 @@ button[mat-raised-button] {
 
 .mat-mdc-header-cell {
   font-weight: bold;
+  user-select: none;
 }
 
 tr:nth-child(even) {
