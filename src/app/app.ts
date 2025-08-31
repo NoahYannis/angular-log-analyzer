@@ -145,6 +145,8 @@ export class App implements AfterViewInit {
           if (!this.sourceApps.includes(logEntry.source)) {
             this.sourceApps.push(logEntry.source);
           }
+
+          parsedLogs.push(logEntry);
         }
       }
 
