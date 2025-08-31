@@ -32,25 +32,25 @@
     <div class="log-level">
       <h2>Log-Level</h2>
       <div class="log-level-row">
-        <mat-slide-toggle>
+        <mat-slide-toggle checked="true" id="VRB" (change)="applyFilter($event)">
           <span class="toggle-label">Verbose</span>
         </mat-slide-toggle>
         <p>(62)</p>
       </div>
       <div class="log-level-row">
-        <mat-slide-toggle>
+        <mat-slide-toggle checked="true" id="INF" (change)="applyFilter($event)">
           <span class="toggle-label">Info</span>
         </mat-slide-toggle>
         <p>(5)</p>
       </div>
       <div class="log-level-row">
-        <mat-slide-toggle>
+        <mat-slide-toggle checked="true" id="WRN" (change)="applyFilter($event)">
           <span class="toggle-label">Warning</span>
         </mat-slide-toggle>
         <p>(12)</p>
       </div>
       <div class="log-level-row">
-        <mat-slide-toggle>
+        <mat-slide-toggle checked="true" id="ERR" (change)="applyFilter($event)">
           <span class="toggle-label">Error</span>
         </mat-slide-toggle>
         <p>(3)</p>
@@ -62,25 +62,25 @@
     <div class="source">
       <h2>Quelle</h2>
       <div class="source-row">
-        <mat-slide-toggle>
+        <mat-slide-toggle checked="true" (change)="applyFilter($event)">
           <span class="toggle-label">DAL</span>
         </mat-slide-toggle>
         <p>(62)</p>
       </div>
       <div class="source-row">
-        <mat-slide-toggle>
+        <mat-slide-toggle checked="true" (change)="applyFilter($event)">
           <span class="toggle-label">CAD</span>
         </mat-slide-toggle>
         <p>(5)</p>
       </div>
       <div class="source-row">
-        <mat-slide-toggle>
+        <mat-slide-toggle checked="true" (change)="applyFilter($event)">
           <span class="toggle-label">EB</span>
         </mat-slide-toggle>
         <p>(12)</p>
       </div>
       <div class="source-row">
-        <mat-slide-toggle>
+        <mat-slide-toggle checked="true" (change)="applyFilter($event)">
           <span class="toggle-label">FW</span>
         </mat-slide-toggle>
         <p>(3)</p>

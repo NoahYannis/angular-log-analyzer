@@ -1,6 +1,10 @@
 import { Component, signal, ViewChild, AfterViewInit, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import {
+  MatSlideToggle,
+  MatSlideToggleChange,
+  MatSlideToggleModule,
+} from '@angular/material/slide-toggle';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -13,6 +17,7 @@ import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatSortModule, MatSort } from '@angular/material/sort';
 import { DatePipe } from '@angular/common';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { filter } from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -38,9 +43,14 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 export class App implements AfterViewInit {
   protected readonly title = signal('angular-log-analyzer');
   displayedColumns: string[] = ['date', 'time', 'level', 'source', 'message'];
+
   logEntries = new MatTableDataSource<any>([]);
+  filteredEntries = new MatTableDataSource<any>([]);
+
   snackBar: MatSnackBar = inject(MatSnackBar);
   @ViewChild(MatSort) sort!: MatSort;
+
+  private filterSettings: { [level: string]: boolean } = {};
 
   readLogFile() {
     const input = document.createElement('input');
@@ -95,6 +105,8 @@ export class App implements AfterViewInit {
           message: match[5].trim(), // Inhalt
         };
 
+        // TODO: Nur hinzufügen, falls Filter passt.
+
         parsedLogs.push(logEntry);
       }
     }
@@ -104,13 +116,30 @@ export class App implements AfterViewInit {
       this.logEntries.data = parsedLogs;
       return;
     }
-    
+
     this.snackBar.open('Keine Log-Einträge gefunden :/', 'OK', {
       duration: 5000,
       horizontalPosition: 'center',
       verticalPosition: 'bottom',
       panelClass: ['snackbar-bottom-margin'],
     });
+  }
+
+  applyFilter(event: MatSlideToggleChange) {
+    let level: string = event.source.id;
+    this.filterSettings[level] = event.source.checked;
+
+    if (this.logEntries.data.length < 1) {
+      return;
+    }
+
+    const disabledLevels = Object.keys(this.filterSettings).filter(
+      (level) => !this.filterSettings[level]
+    );
+
+    this.logEntries.data = this.logEntries.data.filter(
+      (entry: any) => !disabledLevels.includes(entry.level)
+    );
   }
 
   ngAfterViewInit() {
