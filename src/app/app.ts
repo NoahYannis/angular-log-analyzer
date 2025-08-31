@@ -7,7 +7,11 @@ import {
 } from '@angular/material/slide-toggle';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDividerModule } from '@angular/material/divider';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import {
+  MatProgressSpinner,
+  MatProgressSpinnerModule,
+  MatSpinner,
+} from '@angular/material/progress-spinner';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
@@ -43,6 +47,7 @@ import { filter } from 'rxjs';
 export class App implements AfterViewInit {
   protected readonly title = signal('angular-log-analyzer');
   displayedColumns: string[] = ['date', 'time', 'level', 'source', 'message'];
+  isProcessing: boolean = false;
 
   logEntries = new MatTableDataSource<any>([]);
   filteredEntries = new MatTableDataSource<any>([]);
@@ -52,27 +57,39 @@ export class App implements AfterViewInit {
 
   private filterSettings: { [level: string]: boolean } = {};
 
+  ngAfterViewInit() {
+    this.logEntries.sort = this.sort;
+  }
+
   readLogFile() {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.txt,.log';
-    input.style.display = 'none';
+    try {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.txt,.log';
+      input.style.display = 'none';
 
-    input.addEventListener('change', (event: any) => {
-      const file = event.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const content = e.target?.result as string;
-          this.parseLogContent(content);
-        };
-        reader.readAsText(file);
-      }
-    });
+      input.addEventListener('change', (event: any) => {
+        const file = event.target.files[0];
+        if (file) {
+          this.isProcessing = true;
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const content = e.target?.result as string;
+            this.parseLogContent(content);
+            this.isProcessing = false;
+          };
+          reader.readAsText(file);
+        }
+      });
 
-    document.body.appendChild(input);
-    input.click();
-    document.body.removeChild(input);
+      document.body.appendChild(input);
+      input.click();
+      document.body.removeChild(input);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      this.isProcessing = false;
+    }
   }
 
   parseLogContent(content: string) {
@@ -105,8 +122,7 @@ export class App implements AfterViewInit {
           message: match[5].trim(), // Inhalt
         };
 
-        // TODO: Nur hinzufügen, falls Filter passt.
-
+        // TODO: Alle vorkommenen Log-Level und Anwendungen dynamisch abfragen.
         parsedLogs.push(logEntry);
       }
     }
@@ -114,6 +130,9 @@ export class App implements AfterViewInit {
     // Tabelle aktualisieren
     if (parsedLogs.length > 0) {
       this.logEntries.data = parsedLogs;
+
+      // TODO: Nur hinzufügen, falls Filter passt.
+      this.filteredEntries.data = this.logEntries.data;
       return;
     }
 
@@ -123,26 +142,26 @@ export class App implements AfterViewInit {
       verticalPosition: 'bottom',
       panelClass: ['snackbar-bottom-margin'],
     });
+
+    this.isProcessing = false;
   }
 
   applyFilter(event: MatSlideToggleChange) {
-    let level: string = event.source.id;
-    this.filterSettings[level] = event.source.checked;
+    let toggleSetting: string = event.source.id;
+    this.filterSettings[toggleSetting] = event.source.checked;
 
+    // Tabelle nur bei vorhandenen Einträgen neu laden
     if (this.logEntries.data.length < 1) {
       return;
     }
 
     const disabledLevels = Object.keys(this.filterSettings).filter(
-      (level) => !this.filterSettings[level]
+      (toggleSetting) => !this.filterSettings[toggleSetting]
     );
 
-    this.logEntries.data = this.logEntries.data.filter(
-      (entry: any) => !disabledLevels.includes(entry.level)
+    this.filteredEntries.data = this.logEntries.data.filter(
+      (entry: any) =>
+        !disabledLevels.includes(entry.level) && !disabledLevels.includes(entry.source)
     );
-  }
-
-  ngAfterViewInit() {
-    this.logEntries.sort = this.sort;
   }
 }

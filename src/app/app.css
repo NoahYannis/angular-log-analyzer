@@ -8,7 +8,7 @@ button[mat-raised-button] {
   border-radius: 8px;
   background-color: var(--primary-color);
   color: var(--text-color);
-  font-size: 1.rem;
+  font-size: 1rem;
   align-self: center;
 }
 
@@ -66,8 +66,9 @@ button[mat-raised-button] {
 }
 
 .log-display {
-  margin-inline: 3rem;
-  margin-top: 1rem;
+  margin: 3rem;
+  max-width: calc(100vw - 6rem);
+  overflow-x: hidden;
 }
 
 .mat-mdc-table {
@@ -76,12 +77,16 @@ button[mat-raised-button] {
 
 .mat-mdc-row,
 .mat-mdc-header-cell {
-  font-size: 1.2rem;
+  font-size: 1rem;
 }
 
 .mat-mdc-header-cell {
   font-weight: bold;
   user-select: none;
+}
+
+.mat-column-message {
+  white-space: nowrap;
 }
 
 tr:nth-child(even) {
@@ -175,4 +180,12 @@ tr:nth-child(even) {
     background-color: var(--secondary-color);
     color: var(--text-color);
   }
+}
+
+.spinner-container {
+  display: flex;
+  flex-direction: column;
+  margin: 3rem;
+  align-items: center;
+  justify-content: center;
 }

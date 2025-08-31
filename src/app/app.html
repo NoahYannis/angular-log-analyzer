@@ -88,9 +88,16 @@
     </div>
   </div>
 
+  @if (isProcessing) {
+  <div id="spinner" class="spinner-container">
+    <mat-spinner diameter="60" strokeWidth="4"></mat-spinner>
+    <p class="spinner-text">Log-Datei wird verarbeitet...</p>
+  </div>
+  }
+
   <!--Log-Anzeige-->
   <div class="log-display">
-    <table mat-table [dataSource]="logEntries" class="mat-elevation-z8" matSort>
+    <table mat-table [dataSource]="filteredEntries" class="mat-elevation-z8" matSort>
       <ng-container matColumnDef="date">
         <th mat-header-cell *matHeaderCellDef mat-sort-header>Datum</th>
         <td mat-cell *matCellDef="let element">{{ element.date | date : 'dd.MM.yyyy' }}</td>
