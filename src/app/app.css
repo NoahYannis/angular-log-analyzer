@@ -13,9 +13,20 @@ button[mat-raised-button] {
 }
 
 .settings {
+  width: 100%;
+  max-width: 100%;
+  align-self: center;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background-color: var(--background-color);
+  border-bottom: 1px solid var(--text-color);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   display: flex;
+  justify-content: center;
   margin: 0 auto;
   padding: 1rem;
+  box-sizing: border-box;
 
   h2 {
     margin-top: 0;
@@ -38,10 +49,7 @@ button[mat-raised-button] {
   display: flex;
   justify-content: space-between;
   align-items: center;
-
-  p {
-    margin-left: 1rem;
-  }
+  margin-bottom: 0.75rem;
 }
 
 .source {
@@ -54,10 +62,7 @@ button[mat-raised-button] {
   display: flex;
   justify-content: space-between;
   align-items: center;
-
-  p {
-    margin-left: 1rem;
-  }
+  margin-bottom: 0.75rem;
 }
 
 .toggle-label {
@@ -67,7 +72,6 @@ button[mat-raised-button] {
 
 .log-display {
   margin: 3rem;
-  max-width: calc(100vw - 6rem);
   overflow-x: hidden;
 }
 
@@ -82,7 +86,6 @@ button[mat-raised-button] {
 
 .mat-mdc-header-cell {
   font-weight: bold;
-  user-select: none;
 }
 
 .mat-column-message {
@@ -94,7 +97,6 @@ tr:nth-child(even) {
 }
 
 .separator {
-  height: auto;
   margin-inline: 1.5rem;
   width: 1px;
   background-color: var(--text-color);

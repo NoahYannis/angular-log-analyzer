@@ -1,17 +1,9 @@
 import { Component, signal, ViewChild, AfterViewInit, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import {
-  MatSlideToggle,
-  MatSlideToggleChange,
-  MatSlideToggleModule,
-} from '@angular/material/slide-toggle';
+import { MatSlideToggleChange, MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDividerModule } from '@angular/material/divider';
-import {
-  MatProgressSpinner,
-  MatProgressSpinnerModule,
-  MatSpinner,
-} from '@angular/material/progress-spinner';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
@@ -21,7 +13,8 @@ import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatSortModule, MatSort } from '@angular/material/sort';
 import { DatePipe } from '@angular/common';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { filter } from 'rxjs';
+import { FormsModule } from '@angular/forms';
+import { Entry } from './models/entry';
 
 @Component({
   selector: 'app-root',
@@ -39,6 +32,7 @@ import { filter } from 'rxjs';
     MatButtonModule,
     MatTooltipModule,
     MatSnackBarModule,
+    FormsModule,
     DatePipe,
   ],
   templateUrl: './app.html',
@@ -46,16 +40,39 @@ import { filter } from 'rxjs';
 })
 export class App implements AfterViewInit {
   protected readonly title = signal('angular-log-analyzer');
-  displayedColumns: string[] = ['date', 'time', 'level', 'source', 'message'];
+
+  // Speichert die Aktivität der jeweiligen Toggle-Filter.
+  toggleSettings: { [level: string]: boolean } = {};
+
+  // Alle Log-Stufen (Info, Warning, Error..)
+  logLevels: string[] = [];
+
+  // Die Quelle/Anwendung (HottCAD, DAL, MOD...)
+  sourceApps: string[] = [];
+
+  // Suchbegriff falls eingegeben
+  includeTerm: string = '';
+
+  // Herauszufilternde Begriffe (durch Semikolons separiert)
+  exludeTerm: string = '';
+
+  // Dient zur Anzeige des Spinners während des Einlesens der Log-Datei
   isProcessing: boolean = false;
 
-  logEntries = new MatTableDataSource<any>([]);
-  filteredEntries = new MatTableDataSource<any>([]);
+  // Tabellenkopf
+  displayedColumns: string[] = ['date', 'time', 'level', 'source', 'message'];
 
+  // Alle in der Log-Datei gefundenen Einträge
+  logEntries = new MatTableDataSource<Entry>([]);
+
+  // Alle Einträge, die den Filterkriterien entsprechen.
+  filteredEntries = new MatTableDataSource<Entry>([]);
+
+  // Popup anzeigen, falls keine Logs gefunden werden konnten
   snackBar: MatSnackBar = inject(MatSnackBar);
-  @ViewChild(MatSort) sort!: MatSort;
 
-  private filterSettings: { [level: string]: boolean } = {};
+  // Dient zur Sortierung der Tabelle
+  @ViewChild(MatSort) sort!: MatSort;
 
   ngAfterViewInit() {
     this.logEntries.sort = this.sort;
@@ -70,8 +87,11 @@ export class App implements AfterViewInit {
 
       input.addEventListener('change', (event: any) => {
         const file = event.target.files[0];
+
         if (file) {
-          this.isProcessing = true;
+          this.resetFilters();
+          this.isProcessing = true; // Ladespinner anzeigen
+
           const reader = new FileReader();
           reader.onload = (e) => {
             const content = e.target?.result as string;
@@ -86,82 +106,126 @@ export class App implements AfterViewInit {
       input.click();
       document.body.removeChild(input);
     } catch (error) {
-      console.log(error);
+      console.error(error);
     } finally {
       this.isProcessing = false;
     }
   }
 
   parseLogContent(content: string) {
-    // Datei in Zeilen aufteilen
-    const lines = content.split('\n');
-    const parsedLogs = [];
+    try {
+      // Datei in Zeilen aufteilen
+      const lines = content.split('\n');
+      const parsedLogs: Entry[] = [];
 
-    // Der Regex-Ausdruck um die Einträge zu analysieren.
-    // Zuerst wird das Datum ermittelt (4 Zifern, Bindestrich, 2 Ziffern, Bindestrich, 2 Ziffern).
-    // Dann die Uhrzeit (2 Ziffern, Doppelpunkt, 2 Ziffern, Doppelpunkt, 2 Ziffern).
-    // Dann das Loglevel und die Quelle in eckigen Klammern.
-    // Schließlich der Inhalt mit ener beliebigen Zeichenanzahl (.+)
-    const logRegex = /^(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2}:\d{2})\s+\[(\w+)\]\s+\[(\w+)\]\s*(.+)$/;
+      // Der Regex-Ausdruck um die Einträge zu analysieren.
+      // Zuerst wird das Datum ermittelt (4 Zifern, Bindestrich, 2 Ziffern, Bindestrich, 2 Ziffern).
+      // Dann die Uhrzeit (2 Ziffern, Doppelpunkt, 2 Ziffern, Doppelpunkt, 2 Ziffern).
+      // Dann das Loglevel und die Quelle in eckigen Klammern.
+      // Schließlich der Inhalt mit ener beliebigen Zeichenanzahl (.+)
+      const logRegex = /^(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2}:\d{2})\s+\[(\w+)\]\s+\[(\w+)\]\s*(.+)$/;
 
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i].trim();
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
 
-      if (line === '') {
-        continue;
+        if (line === '') {
+          continue;
+        }
+
+        const match = line.match(logRegex);
+
+        // Log-Zeile entspricht dem korrekten Schema.
+        if (match) {
+          const logEntry: Entry = Entry.fromRegexMatch(match);
+
+          if (!this.logLevels.includes(logEntry.level)) {
+            this.logLevels.push(logEntry.level);
+          }
+
+          if (!this.sourceApps.includes(logEntry.source)) {
+            this.sourceApps.push(logEntry.source);
+          }
+        }
       }
 
-      const match = line.match(logRegex);
-
-      if (match) {
-        const logEntry = {
-          date: match[1], // Datum
-          time: match[2], // Uhrzeit
-          level: match[3], // Level
-          source: match[4], // Anwendung
-          message: match[5].trim(), // Inhalt
-        };
-
-        // TODO: Alle vorkommenen Log-Level und Anwendungen dynamisch abfragen.
-        parsedLogs.push(logEntry);
+      // Tabelle aktualisieren
+      if (parsedLogs.length > 0) {
+        this.logEntries.data = parsedLogs;
+        this.filteredEntries.data = this.logEntries.data;
+        return;
       }
+
+      this.snackBar.open('Keine Log-Einträge gefunden :/', 'OK', {
+        duration: 5000,
+        horizontalPosition: 'center',
+        verticalPosition: 'bottom',
+        panelClass: ['snackbar-bottom-margin'],
+      });
+    } catch (error) {
+      this.snackBar.open(`Fehler beim Parsen der Log-Datei: ${error}`, 'OK', {
+        duration: 8000,
+        horizontalPosition: 'center',
+        verticalPosition: 'bottom',
+        panelClass: ['snackbar-bottom-margin'],
+      });
+      console.error('Parse-Fehler:', error);
+    } finally {
+      this.isProcessing = false; // Spinner ausblenden.
     }
+  }
 
-    // Tabelle aktualisieren
-    if (parsedLogs.length > 0) {
-      this.logEntries.data = parsedLogs;
-
-      // TODO: Nur hinzufügen, falls Filter passt.
-      this.filteredEntries.data = this.logEntries.data;
+  // Suche und Ausschluss von Begriffen
+  applySearchFilter() {
+    if (this.logEntries.data.length < 1) {
       return;
     }
 
-    this.snackBar.open('Keine Log-Einträge gefunden :/', 'OK', {
-      duration: 5000,
-      horizontalPosition: 'center',
-      verticalPosition: 'bottom',
-      panelClass: ['snackbar-bottom-margin'],
-    });
-
-    this.isProcessing = false;
+    this.filteredEntries.data = this.logEntries.data.filter((entry) =>
+      this.meetsFilterCriteria(entry)
+    );
   }
 
-  applyFilter(event: MatSlideToggleChange) {
-    let toggleSetting: string = event.source.id;
-    this.filterSettings[toggleSetting] = event.source.checked;
+  applyToggleFilter(event: MatSlideToggleChange) {
+    let toggle: string = event.source.id;
+    this.toggleSettings[toggle] = event.source.checked;
 
     // Tabelle nur bei vorhandenen Einträgen neu laden
     if (this.logEntries.data.length < 1) {
       return;
     }
 
-    const disabledLevels = Object.keys(this.filterSettings).filter(
-      (toggleSetting) => !this.filterSettings[toggleSetting]
+    this.filteredEntries.data = this.logEntries.data.filter((entry: any) =>
+      this.meetsFilterCriteria(entry)
+    );
+  }
+
+  meetsFilterCriteria(entry: Entry): boolean {
+    const disabledSettings = Object.keys(this.toggleSettings).filter(
+      (toggle) => !this.toggleSettings[toggle]
     );
 
-    this.filteredEntries.data = this.logEntries.data.filter(
-      (entry: any) =>
-        !disabledLevels.includes(entry.level) && !disabledLevels.includes(entry.source)
-    );
+    // Der Toggle für das Log-Level und die Quelle müssen aktiv sein.
+    const levelAndSourceActive =
+      !disabledSettings.includes(entry.level) && !disabledSettings.includes(entry.source);
+
+    // Falls ein Suchbegriff eingegeben wurde muss dieser enthalten sein.
+    const matchesSearchTerm = entry.containsSearchTerm(this.includeTerm);
+
+    const excludeTerms = this.exludeTerm
+      .split(';')
+      .map((term) => term.trim())
+      .filter((term) => term !== '');
+
+    const doesNotContainExcludeTerms = entry.doesNotContainExcludeTerms(excludeTerms);
+    
+    return levelAndSourceActive && matchesSearchTerm && doesNotContainExcludeTerms;
+  }
+
+  private resetFilters() {
+    this.logLevels = [];
+    this.sourceApps = [];
+    this.includeTerm = '';
+    this.exludeTerm = '';
+    this.toggleSettings = {};
   }
 }
