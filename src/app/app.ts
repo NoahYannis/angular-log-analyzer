@@ -1,4 +1,4 @@
-import { Component, signal, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, signal, ViewChild, AfterViewInit, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatChipsModule } from '@angular/material/chips';
@@ -8,6 +8,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatSortModule, MatSort } from '@angular/material/sort';
 import { DatePipe } from '@angular/common';
@@ -28,6 +29,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     MatSortModule,
     MatButtonModule,
     MatTooltipModule,
+    MatSnackBarModule,
     DatePipe,
   ],
   templateUrl: './app.html',
@@ -37,6 +39,7 @@ export class App implements AfterViewInit {
   protected readonly title = signal('angular-log-analyzer');
   displayedColumns: string[] = ['date', 'time', 'level', 'source', 'message'];
   logEntries = new MatTableDataSource<any>([]);
+  snackBar: MatSnackBar = inject(MatSnackBar);
   @ViewChild(MatSort) sort!: MatSort;
 
   readLogFile() {
@@ -65,8 +68,6 @@ export class App implements AfterViewInit {
   parseLogContent(content: string) {
     // Datei in Zeilen aufteilen
     const lines = content.split('\n');
-    console.log(`📄 Anzahl Zeilen: ${lines.length}`);
-
     const parsedLogs = [];
 
     // Der Regex-Ausdruck um die Einträge zu analysieren.
@@ -101,9 +102,15 @@ export class App implements AfterViewInit {
     // Tabelle aktualisieren
     if (parsedLogs.length > 0) {
       this.logEntries.data = parsedLogs;
-    } else {
-      console.log('⚠️ Keine Log-Einträge gefunden.'); // TOOD: Snackbar anzeigen.
+      return;
     }
+    
+    this.snackBar.open('Keine Log-Einträge gefunden :/', 'OK', {
+      duration: 5000,
+      horizontalPosition: 'center',
+      verticalPosition: 'bottom',
+      panelClass: ['snackbar-bottom-margin'],
+    });
   }
 
   ngAfterViewInit() {
