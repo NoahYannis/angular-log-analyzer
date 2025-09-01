@@ -41,6 +41,9 @@ import { Entry } from './models/entry';
 export class App implements AfterViewInit {
   protected readonly title = signal('angular-log-analyzer');
 
+  // Name der eingelesenen Datei inklusive deren Größe.
+  logFileName: string = "Log einlesen";
+
   // Speichert die Aktivität der jeweiligen Toggle-Filter.
   toggleSettings: { [level: string]: boolean } = {};
 
@@ -90,6 +93,7 @@ export class App implements AfterViewInit {
 
         if (file) {
           this.resetFilters();
+          this.logFileName = `${file.name} (${(file.size / (1024 * 1024)).toFixed(2)} MB)`;
           this.isProcessing = true; // Ladespinner anzeigen
 
           const reader = new FileReader();
@@ -224,6 +228,7 @@ export class App implements AfterViewInit {
   }
 
   private resetFilters() {
+    this.logFileName = "Log einlesen";
     this.logLevels = [];
     this.sourceApps = [];
     this.includeTerm = '';
