@@ -204,9 +204,7 @@ export class App implements AfterViewInit {
       return;
     }
 
-    this.filteredEntries.data = this.logEntries.data.filter((entry) =>
-      this.meetsFilterCriteria(entry)
-    );
+    this.filterEntries();
   }
 
   applyToggleFilter(event: MatSlideToggleChange) {
@@ -218,9 +216,19 @@ export class App implements AfterViewInit {
       return;
     }
 
-    this.filteredEntries.data = this.logEntries.data.filter((entry: any) =>
-      this.meetsFilterCriteria(entry)
-    );
+    this.filterEntries();
+  }
+
+  private filterEntries() {
+    this.isProcessing = true;
+
+    // Asynchron laden
+    setTimeout(() => {
+      this.filteredEntries.data = this.logEntries.data.filter((entry) =>
+        this.meetsFilterCriteria(entry)
+      );
+      this.isProcessing = false;
+    }, 0);
   }
 
   meetsFilterCriteria(entry: Entry): boolean {
