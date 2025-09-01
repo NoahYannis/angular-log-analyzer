@@ -11,6 +11,8 @@
   --warning-color: #ffb74d;
   --info-color: #64b5f6; 
   --verbose-color: #9e9e9e;
+  --drag-over-color: #880000;
+  --drag-over-shadow: rgba(136, 0, 0, 0.4);
 }
 
 html,

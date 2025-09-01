@@ -10,6 +10,29 @@ button[mat-raised-button] {
   color: var(--text-color);
   font-size: 1rem;
   align-self: center;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  position: relative;
+
+  &.drag-over {
+    background: var(--drag-over-color);
+    transform: scale(1.05);
+    box-shadow: 0 0 20px var(--drag-over-shadow), 0 0 40px var(--drag-over-shadow),
+      0 4px 12px rgba(136, 0, 0, 0.8);
+
+    &::after {
+      content: '📁 Datei ablegen';
+      position: absolute;
+      top: 50px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--drag-over-color);
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      white-space: nowrap;
+    }
+  }
 }
 
 .settings {

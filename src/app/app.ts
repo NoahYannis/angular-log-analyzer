@@ -42,7 +42,7 @@ export class App implements AfterViewInit {
   protected readonly title = signal('angular-log-analyzer');
 
   // Name der eingelesenen Datei inklusive deren Größe.
-  logFileName: string = "Log einlesen";
+  logFileName: string = 'Log einlesen';
 
   // Speichert die Aktivität der jeweiligen Toggle-Filter.
   toggleSettings: { [level: string]: boolean } = {};
@@ -61,6 +61,9 @@ export class App implements AfterViewInit {
 
   // Dient zur Anzeige des Spinners während des Einlesens der Log-Datei
   isProcessing: boolean = false;
+
+  // Drag & Drop Status
+  isDragOver: boolean = false;
 
   // Tabellenkopf
   displayedColumns: string[] = ['date', 'time', 'level', 'source', 'message'];
@@ -81,7 +84,7 @@ export class App implements AfterViewInit {
     this.logEntries.sort = this.sort;
   }
 
-  readLogFile() {
+  selectLogFile() {
     try {
       const input = document.createElement('input');
       input.type = 'file';
@@ -90,19 +93,8 @@ export class App implements AfterViewInit {
 
       input.addEventListener('change', (event: any) => {
         const file = event.target.files[0];
-
         if (file) {
-          this.resetFilters();
-          this.logFileName = `${file.name} (${(file.size / (1024 * 1024)).toFixed(2)} MB)`;
-          this.isProcessing = true; // Ladespinner anzeigen
-
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            const content = e.target?.result as string;
-            this.parseLogContent(content);
-            this.isProcessing = false;
-          };
-          reader.readAsText(file);
+          this.processFile(file);
         }
       });
 
@@ -116,7 +108,33 @@ export class App implements AfterViewInit {
     }
   }
 
-  parseLogContent(content: string) {
+  private processFile(file: File) {
+    this.resetFilters();
+    this.logFileName = `${file.name} (${(file.size / (1024 * 1024)).toFixed(2)} MB)`;
+    this.isProcessing = true;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const content = e.target?.result as string;
+      this.parseLogContent(content);
+      this.isProcessing = false;
+    };
+
+    reader.onerror = (error) => {
+      this.snackBar.open('Fehler beim Lesen der Datei', 'OK', {
+        duration: 5000,
+        horizontalPosition: 'center',
+        verticalPosition: 'bottom',
+        panelClass: ['snackbar-bottom-margin'],
+      });
+      console.error('FileReader Fehler:', error);
+      this.isProcessing = false;
+    };
+
+    reader.readAsText(file);
+  }
+
+  private parseLogContent(content: string) {
     try {
       // Datei in Zeilen aufteilen
       const lines = content.split('\n');
@@ -223,16 +241,53 @@ export class App implements AfterViewInit {
       .filter((term) => term !== '');
 
     const doesNotContainExcludeTerms = entry.doesNotContainExcludeTerms(excludeTerms);
-    
+
     return levelAndSourceActive && matchesSearchTerm && doesNotContainExcludeTerms;
   }
 
   private resetFilters() {
-    this.logFileName = "Log einlesen";
+    this.logFileName = 'Log einlesen';
     this.logLevels = [];
     this.sourceApps = [];
     this.includeTerm = '';
     this.exludeTerm = '';
     this.toggleSettings = {};
+  }
+
+  onDragOver(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragOver = true;
+  }
+
+  onDragLeave(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragOver = false;
+  }
+
+  onDrop(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragOver = false;
+
+    const files = event.dataTransfer?.files;
+    if (!files || files.length === 0) {
+      return;
+    }
+
+    const file = files[0];
+
+    if (!file.type.includes('text') && !file.name.endsWith('.log') && !file.name.endsWith('.txt')) {
+      this.snackBar.open('Bitte eine gültige Log-Datei auswählen (.txt, .log)', 'OK', {
+        duration: 5000,
+        horizontalPosition: 'center',
+        verticalPosition: 'bottom',
+        panelClass: ['snackbar-bottom-margin'],
+      });
+      return;
+    }
+
+    this.processFile(file);
   }
 }
