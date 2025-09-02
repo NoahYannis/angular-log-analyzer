@@ -11,6 +11,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatSortModule, MatSort } from '@angular/material/sort';
+import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
 import { DatePipe } from '@angular/common';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { FormsModule } from '@angular/forms';
@@ -29,6 +30,7 @@ import { Entry } from './models/entry';
     MatIconModule,
     MatTableModule,
     MatSortModule,
+    MatPaginatorModule,
     MatButtonModule,
     MatTooltipModule,
     MatSnackBarModule,
@@ -80,8 +82,12 @@ export class App implements AfterViewInit {
   // Dient zur Sortierung der Tabelle
   @ViewChild(MatSort) sort!: MatSort;
 
+  // Dient zur Paginierung der Tabelle
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+
   ngAfterViewInit() {
-    this.logEntries.sort = this.sort;
+    this.filteredEntries.sort = this.sort;
+    this.filteredEntries.paginator = this.paginator;
   }
 
   selectLogFile() {
@@ -176,6 +182,8 @@ export class App implements AfterViewInit {
       if (parsedLogs.length > 0) {
         this.logEntries.data = parsedLogs;
         this.filteredEntries.data = this.logEntries.data;
+        this.filteredEntries.sort = this.sort;
+        this.filteredEntries.paginator = this.paginator;
         return;
       }
 
@@ -231,6 +239,10 @@ export class App implements AfterViewInit {
       this.filteredEntries.data = this.logEntries.data.filter((entry) =>
         this.meetsFilterCriteria(entry)
       );
+
+      if (this.paginator) {
+        this.paginator.firstPage();
+      }
       this.isProcessing = false;
     }, 0);
   }
