@@ -48,26 +48,30 @@
 
     <div class="log-level">
       <h2>Log-Level</h2>
-      @for (level of logLevels; track $index) {
-      <div class="log-level-row">
-        <mat-slide-toggle checked="true" id="{{ level }}" (change)="applyToggleFilter($event)">
-          <span class="toggle-label">{{ level }}</span>
-        </mat-slide-toggle>
+      <div class="toggle-container">
+        @for (level of logLevels; track $index) {
+        <div class="log-level-row">
+          <mat-slide-toggle checked="true" id="{{ level }}" (change)="applyToggleFilter($event)">
+            <span class="toggle-label">{{ level }}</span>
+          </mat-slide-toggle>
+        </div>
+        }
       </div>
-      }
     </div>
 
     <mat-divider class="separator" [vertical]="false"></mat-divider>
 
     <div class="source">
       <h2>Quelle</h2>
-      @for (source of sourceApps; track $index) {
-      <div class="source-row">
-        <mat-slide-toggle checked="true" id="{{ source }}" (change)="applyToggleFilter($event)">
-          <span class="toggle-label">{{ source }}</span>
-        </mat-slide-toggle>
+      <div class="toggle-container">
+        @for (source of sourceApps; track $index) {
+        <div class="source-row">
+          <mat-slide-toggle checked="true" id="{{ source }}" (change)="applyToggleFilter($event)">
+            <span class="toggle-label">{{ source }}</span>
+          </mat-slide-toggle>
+        </div>
+        }
       </div>
-      }
     </div>
   </div>
 

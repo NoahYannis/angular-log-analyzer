@@ -76,9 +76,15 @@ button[mat-raised-button] {
 }
 
 .source {
+  padding: 1rem;
+}
+
+.toggle-container {
   display: flex;
   flex-direction: column;
-  padding: 1rem;
+  flex-wrap: wrap;
+  max-height: 200px;
+  column-gap: 1.5rem;
 }
 
 .source-row {
@@ -193,7 +199,7 @@ tr:nth-child(even) {
     }
 
     &[data-level='FTL'] {
-      background-color: var(--error-color);
+      background-color: var(--fatal-color);
 
       &::before {
         content: 'report_problem';

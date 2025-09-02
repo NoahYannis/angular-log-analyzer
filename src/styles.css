@@ -8,6 +8,7 @@
   --text-color: #ffffff;
   --text-color-secondary: #000000;
   --error-color: #e57373; 
+  --fatal-color: #8b0000; 
   --warning-color: #ffb74d;
   --info-color: #64b5f6; 
   --verbose-color: #9e9e9e;
