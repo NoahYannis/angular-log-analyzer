@@ -179,12 +179,16 @@ export class App implements AfterViewInit {
         return;
       }
 
-      this.snackBar.open('Keine Log-Einträge gefunden :/', 'OK', {
-        duration: 5000,
-        horizontalPosition: 'center',
-        verticalPosition: 'bottom',
-        panelClass: ['snackbar-bottom-margin'],
-      });
+      this.snackBar.open(
+        'Keine Log-Einträge gefunden. Einträge müssen folgendem Format entsprechen: YYYY-MM-DD HH:MM:SS [LEVEL] [QUELLE] Nachricht',
+        'OK',
+        {
+          duration: 8000,
+          horizontalPosition: 'center',
+          verticalPosition: 'bottom',
+          panelClass: ['snackbar-bottom-margin'],
+        }
+      );
     } catch (error) {
       this.snackBar.open(`Fehler beim Parsen der Log-Datei: ${error}`, 'OK', {
         duration: 8000,
