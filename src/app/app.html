@@ -76,7 +76,7 @@
   </div>
 
   <!--Log-Anzeige-->
-  <div class="log-display">
+  <div class="log-display" #logDisplay>
     <table mat-table [dataSource]="filteredEntries" class="mat-elevation-z8" matSort>
       <ng-container matColumnDef="date">
         <th mat-header-cell *matHeaderCellDef mat-sort-header>Datum</th>
@@ -122,6 +122,7 @@
       [pageSizeOptions]="[25, 50, 100, 250, 500]"
       [pageSize]="100"
       showFirstLastButtons="true"
+      (page)="scrollToTop()"
     >
     </mat-paginator>
   </div>

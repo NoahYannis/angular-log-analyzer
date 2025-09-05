@@ -1,4 +1,4 @@
-import { Component, signal, ViewChild, AfterViewInit, inject } from '@angular/core';
+import { Component, signal, ViewChild, AfterViewInit, inject, ElementRef } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { MatSlideToggleChange, MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatChipsModule } from '@angular/material/chips';
@@ -84,6 +84,9 @@ export class App implements AfterViewInit {
 
   // Dient zur Paginierung der Tabelle
   @ViewChild(MatPaginator) paginator!: MatPaginator;
+
+  // Der Log-Container. Wird durch das #logDisplay im HTML verknüpft.
+  @ViewChild('logDisplay', { read: ElementRef }) logDisplay!: ElementRef;
 
   ngAfterViewInit() {
     this.filteredEntries.sort = this.sort;
@@ -313,5 +316,14 @@ export class App implements AfterViewInit {
     }
 
     this.processFile(file);
+  }
+
+  scrollToTop(): void {
+    const rect = this.logDisplay.nativeElement.getBoundingClientRect();
+    const offsetTop = window.pageYOffset + rect.top;
+    window.scrollTo({
+      top: offsetTop - 300,
+      behavior: 'smooth',
+    });
   }
 }
