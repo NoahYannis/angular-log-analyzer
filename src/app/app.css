@@ -234,3 +234,9 @@ tr:nth-child(even) {
   color: var(--text-color);
   font-size: 0.875rem;
 }
+
+.settings-checkbox-text {
+  font-size: 1rem;
+  text-align: center;
+  vertical-align: middle;
+}

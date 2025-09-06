@@ -20,7 +20,7 @@ html,
 body {
   background-color: var(--background-color);
   color: var(--text-color);
-  zoom: 0.95; 
+  zoom: 0.85; 
 }
 
 body {
