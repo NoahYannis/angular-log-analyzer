@@ -17,6 +17,7 @@ import { DatePipe } from '@angular/common';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { FormsModule } from '@angular/forms';
 import { Entry } from './models/entry';
+import { Settings } from './models/settings';
 
 @Component({
   selector: 'app-root',
@@ -45,11 +46,17 @@ import { Entry } from './models/entry';
 export class App implements AfterViewInit {
   protected readonly title = signal('angular-log-analyzer');
 
+  // Key zum Speichern und Abfragen von Einstellungen aus dem LocalStorage
+  private readonly LOG_ANALYZER_SETTINGS_KEY: string = 'log_analyzer_settings';
+
+  // Einstellungen verzögert im LocalStorage speichern (Performance)
+  private saveTimeout?: number;
+
+  // Enthält alle Einstellungen (Regex, Filter...)
+  logSettings: Settings = Settings.createGlobal();
+
   // Name der eingelesenen Datei inklusive deren Größe.
   logFileName: string = 'Log einlesen';
-
-  // Speichert die Aktivität der jeweiligen Toggle-Filter.
-  toggleSettings: { [level: string]: boolean } = {};
 
   // Alle Log-Stufen (Info, Warning, Error..)
   logLevels: string[] = [];
@@ -57,20 +64,11 @@ export class App implements AfterViewInit {
   // Die Quelle/Anwendung (HottCAD, DAL, MOD...)
   sourceApps: string[] = [];
 
-  // Suchbegriff falls eingegeben
-  includeTerm: string = '';
-
-  // Herauszufilternde Begriffe (durch Semikolons separiert)
-  exludeTerm: string = '';
-
   // Dient zur Anzeige des Spinners während des Einlesens der Log-Datei
   isProcessing: boolean = false;
 
   // Drag & Drop Status
   isDragOver: boolean = false;
-
-  // Einstellungen für alle Logs anwenden.
-  settingsGlobal: boolean = true;
 
   // Tabellenkopf
   displayedColumns: string[] = ['date', 'time', 'level', 'source', 'message'];
@@ -92,6 +90,13 @@ export class App implements AfterViewInit {
 
   // Der Log-Container. Wird durch das #logDisplay im HTML verknüpft.
   @ViewChild('logDisplay', { read: ElementRef }) logDisplay!: ElementRef;
+
+  ngOnInit(): void {
+    const savedSettings = localStorage.getItem(this.LOG_ANALYZER_SETTINGS_KEY);
+    if (savedSettings) {
+      this.logSettings = JSON.parse(savedSettings);
+    }
+  }
 
   ngAfterViewInit() {
     this.filteredEntries.sort = this.sort;
@@ -176,15 +181,15 @@ export class App implements AfterViewInit {
 
           if (!this.logLevels.includes(logEntry.level)) {
             this.logLevels.push(logEntry.level);
-            this.toggleSettings[logEntry.level] = this.settingsGlobal
-              ? this.toggleSettings[logEntry.level] ?? true // Bisherige Einstellung oder true falls undefined
+            this.logSettings.toggleSettings[logEntry.level] = this.logSettings.settingsGlobal
+              ? this.logSettings.toggleSettings[logEntry.level] ?? true // Bisherige Einstellung oder true falls undefined
               : true;
           }
 
           if (!this.sourceApps.includes(logEntry.source)) {
             this.sourceApps.push(logEntry.source);
-            this.toggleSettings[logEntry.source] = this.settingsGlobal
-              ? this.toggleSettings[logEntry.source] ?? true // Bisherige Einstellung oder true falls undefined
+            this.logSettings.toggleSettings[logEntry.source] = this.logSettings.settingsGlobal
+              ? this.logSettings.toggleSettings[logEntry.source] ?? true // Bisherige Einstellung oder true falls undefined
               : true;
           }
 
@@ -230,18 +235,20 @@ export class App implements AfterViewInit {
       return;
     }
 
+    this.delayedSettingsSave();
     this.filterEntries();
   }
 
   applyToggleFilter(event: MatSlideToggleChange) {
     let toggle: string = event.source.id;
-    this.toggleSettings[toggle] = event.source.checked;
+    this.logSettings.toggleSettings[toggle] = event.source.checked;
 
     // Tabelle nur bei vorhandenen Einträgen neu laden
     if (this.logEntries.data.length < 1) {
       return;
     }
 
+    this.delayedSettingsSave();
     this.filterEntries();
   }
 
@@ -262,8 +269,8 @@ export class App implements AfterViewInit {
   }
 
   meetsFilterCriteria(entry: Entry): boolean {
-    const disabledSettings = Object.keys(this.toggleSettings).filter(
-      (toggle) => !this.toggleSettings[toggle]
+    const disabledSettings = Object.keys(this.logSettings.toggleSettings).filter(
+      (toggle) => !this.logSettings.toggleSettings[toggle]
     );
 
     // Der Toggle für das Log-Level und die Quelle müssen aktiv sein.
@@ -271,9 +278,9 @@ export class App implements AfterViewInit {
       !disabledSettings.includes(entry.level) && !disabledSettings.includes(entry.source);
 
     // Falls ein Suchbegriff eingegeben wurde muss dieser enthalten sein.
-    const matchesSearchTerm = entry.containsSearchTerm(this.includeTerm);
+    const matchesSearchTerm = entry.containsSearchTerm(this.logSettings.includeTerm);
 
-    const excludeTerms = this.exludeTerm
+    const excludeTerms = this.logSettings.exludeTerm
       .split(';')
       .map((term) => term.trim())
       .filter((term) => term !== '');
@@ -288,11 +295,17 @@ export class App implements AfterViewInit {
     this.logLevels = [];
     this.sourceApps = [];
 
-    if (!this.settingsGlobal) {
-      this.includeTerm = '';
-      this.exludeTerm = '';
-      this.toggleSettings = {};
+    if (!this.logSettings.settingsGlobal) {
+      this.logSettings = Settings.createLocal();
     }
+  }
+
+  // Gespeicherte Einstellungen verzögert im LocalStorage speichenr
+  private delayedSettingsSave(): void {
+    clearTimeout(this.saveTimeout);
+    this.saveTimeout = setTimeout(() => {
+      localStorage.setItem(this.LOG_ANALYZER_SETTINGS_KEY, JSON.stringify(this.logSettings));
+    }, 5000);
   }
 
   onDragOver(event: DragEvent) {

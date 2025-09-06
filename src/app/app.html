@@ -29,12 +29,22 @@
       <h2>Filter</h2>
       <mat-form-field appearance="outline">
         <mat-label>Suchen</mat-label>
-        <input matInput type="text" [(ngModel)]="includeTerm" (input)="applySearchFilter()" />
+        <input
+          matInput
+          type="text"
+          [(ngModel)]="logSettings.includeTerm"
+          (input)="applySearchFilter()"
+        />
         <mat-icon matSuffix>search</mat-icon>
       </mat-form-field>
       <mat-form-field appearance="outline">
         <mat-label>Ausschließen</mat-label>
-        <input matInput type="text" [(ngModel)]="exludeTerm" (input)="applySearchFilter()" />
+        <input
+          matInput
+          type="text"
+          [(ngModel)]="logSettings.exludeTerm"
+          (input)="applySearchFilter()"
+        />
         <mat-icon
           matSuffix
           matTooltip="Mehrere Begriffe mit Semikolon trennen => Wort1;Wort2;Wort3"
@@ -42,13 +52,15 @@
           >info</mat-icon
         >
       </mat-form-field>
-      <mat-checkbox
-        [(ngModel)]="settingsGlobal"
-        matTooltip="Einstellungen für alle Logs anwenden. Filter werden nicht zurückgesetzt."
-        matTooltipShowDelay="750"
-        matTooltipPosition="below"
-      >
-        Einstellungen global anwenden
+      <mat-checkbox [(ngModel)]="logSettings.settingsGlobal">
+        <span 
+          matTooltip="Einstellungen für alle Logs anwenden. Filter werden nicht zurückgesetzt."
+          matTooltipPosition="right"
+          [matTooltipShowDelay]="500"
+          class="tooltip-text"
+        >
+          Einstellungen global anwenden
+        </span>
       </mat-checkbox>
     </div>
 
@@ -61,7 +73,7 @@
         <div class="log-level-row">
           <mat-slide-toggle
             id="{{ level }}"
-            [checked]="toggleSettings[level]"
+            [checked]="logSettings.toggleSettings[level]"
             (change)="applyToggleFilter($event)"
           >
             <span class="toggle-label">{{ level }}</span>
@@ -80,7 +92,7 @@
         <div class="source-row">
           <mat-slide-toggle
             id="{{ source }}"
-            [checked]="toggleSettings[source]"
+            [checked]="logSettings.toggleSettings[source]"
             (change)="applyToggleFilter($event)"
           >
             <span class="toggle-label">{{ source }}</span>
