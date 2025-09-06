@@ -12,6 +12,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatSortModule, MatSort } from '@angular/material/sort';
 import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { DatePipe } from '@angular/common';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { FormsModule } from '@angular/forms';
@@ -34,6 +35,7 @@ import { Entry } from './models/entry';
     MatButtonModule,
     MatTooltipModule,
     MatSnackBarModule,
+    MatCheckboxModule,
     FormsModule,
     DatePipe,
   ],
@@ -66,6 +68,9 @@ export class App implements AfterViewInit {
 
   // Drag & Drop Status
   isDragOver: boolean = false;
+
+  // Einstellungen für alle Logs anwenden.
+  settingsGlobal: boolean = true;
 
   // Tabellenkopf
   displayedColumns: string[] = ['date', 'time', 'level', 'source', 'message'];
@@ -171,10 +176,16 @@ export class App implements AfterViewInit {
 
           if (!this.logLevels.includes(logEntry.level)) {
             this.logLevels.push(logEntry.level);
+            this.toggleSettings[logEntry.level] = this.settingsGlobal
+              ? this.toggleSettings[logEntry.level] ?? true // Bisherige Einstellung oder true falls undefined
+              : true;
           }
 
           if (!this.sourceApps.includes(logEntry.source)) {
             this.sourceApps.push(logEntry.source);
+            this.toggleSettings[logEntry.source] = this.settingsGlobal
+              ? this.toggleSettings[logEntry.source] ?? true // Bisherige Einstellung oder true falls undefined
+              : true;
           }
 
           parsedLogs.push(logEntry);
@@ -184,7 +195,7 @@ export class App implements AfterViewInit {
       // Tabelle aktualisieren
       if (parsedLogs.length > 0) {
         this.logEntries.data = parsedLogs;
-        this.filteredEntries.data = this.logEntries.data;
+        this.filteredEntries.data = this.logEntries.data.filter((e) => this.meetsFilterCriteria(e));
         this.filteredEntries.sort = this.sort;
         this.filteredEntries.paginator = this.paginator;
         return;
@@ -276,9 +287,12 @@ export class App implements AfterViewInit {
     this.logFileName = 'Log einlesen';
     this.logLevels = [];
     this.sourceApps = [];
-    this.includeTerm = '';
-    this.exludeTerm = '';
-    this.toggleSettings = {};
+
+    if (!this.settingsGlobal) {
+      this.includeTerm = '';
+      this.exludeTerm = '';
+      this.toggleSettings = {};
+    }
   }
 
   onDragOver(event: DragEvent) {

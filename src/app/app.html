@@ -42,6 +42,14 @@
           >info</mat-icon
         >
       </mat-form-field>
+      <mat-checkbox
+        [(ngModel)]="settingsGlobal"
+        matTooltip="Einstellungen für alle Logs anwenden. Filter werden nicht zurückgesetzt."
+        matTooltipShowDelay="750"
+        matTooltipPosition="below"
+      >
+        Einstellungen global anwenden
+      </mat-checkbox>
     </div>
 
     <mat-divider class="separator" [vertical]="false"></mat-divider>
@@ -51,7 +59,11 @@
       <div class="toggle-container">
         @for (level of logLevels; track $index) {
         <div class="log-level-row">
-          <mat-slide-toggle checked="true" id="{{ level }}" (change)="applyToggleFilter($event)">
+          <mat-slide-toggle
+            id="{{ level }}"
+            [checked]="toggleSettings[level]"
+            (change)="applyToggleFilter($event)"
+          >
             <span class="toggle-label">{{ level }}</span>
           </mat-slide-toggle>
         </div>
@@ -66,7 +78,11 @@
       <div class="toggle-container">
         @for (source of sourceApps; track $index) {
         <div class="source-row">
-          <mat-slide-toggle checked="true" id="{{ source }}" (change)="applyToggleFilter($event)">
+          <mat-slide-toggle
+            id="{{ source }}"
+            [checked]="toggleSettings[source]"
+            (change)="applyToggleFilter($event)"
+          >
             <span class="toggle-label">{{ source }}</span>
           </mat-slide-toggle>
         </div>
