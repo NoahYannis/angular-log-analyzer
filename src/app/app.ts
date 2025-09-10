@@ -49,6 +49,14 @@ export class App implements AfterViewInit {
   // Key zum Speichern und Abfragen von Einstellungen aus dem LocalStorage
   private readonly LOG_ANALYZER_SETTINGS_KEY: string = 'log_analyzer_settings';
 
+  // Log-Format von HottCAD
+  // Zuerst wird das Datum ermittelt (4 Zifern, Bindestrich, 2 Ziffern, Bindestrich, 2 Ziffern).
+  // Dann die Uhrzeit (2 Ziffern, Doppelpunkt, 2 Ziffern, Doppelpunkt, 2 Ziffern).
+  // Dann das Loglevel und die Quelle in eckigen Klammern.
+  // Schließlich der Inhalt mit ener beliebigen Zeichenanzahl (.+)
+  private hottCadLogRegex: RegExp =
+    /^(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2}:\d{2})\s+\[(\w+)\]\s+\[(\w+)\]\s*(.+)$/;
+
   // Einstellungen verzögert im LocalStorage speichern (Performance)
   private saveTimeout?: number;
 
@@ -159,13 +167,6 @@ export class App implements AfterViewInit {
       const lines = content.split('\n');
       const parsedLogs: Entry[] = [];
 
-      // Der Regex-Ausdruck um die Einträge zu analysieren.
-      // Zuerst wird das Datum ermittelt (4 Zifern, Bindestrich, 2 Ziffern, Bindestrich, 2 Ziffern).
-      // Dann die Uhrzeit (2 Ziffern, Doppelpunkt, 2 Ziffern, Doppelpunkt, 2 Ziffern).
-      // Dann das Loglevel und die Quelle in eckigen Klammern.
-      // Schließlich der Inhalt mit ener beliebigen Zeichenanzahl (.+)
-      const logRegex = /^(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2}:\d{2})\s+\[(\w+)\]\s+\[(\w+)\]\s*(.+)$/;
-
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i].trim();
 
@@ -173,7 +174,7 @@ export class App implements AfterViewInit {
           continue;
         }
 
-        const match = line.match(logRegex);
+        const match = line.match(this.hottCadLogRegex);
 
         // Log-Zeile entspricht dem korrekten Schema.
         if (match) {

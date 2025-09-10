@@ -240,3 +240,8 @@ tr:nth-child(even) {
   text-align: center;
   vertical-align: middle;
 }
+
+mat-form-field {
+  min-width: 400px;
+}
+
