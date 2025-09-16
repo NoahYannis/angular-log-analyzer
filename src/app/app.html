@@ -33,7 +33,7 @@
           matInput
           type="text"
           [(ngModel)]="logSettings.includeTerm"
-          (input)="applySearchFilter()"
+          (input)="applySettings()"
         />
         <mat-icon matSuffix>search</mat-icon>
       </mat-form-field>
@@ -43,7 +43,7 @@
           matInput
           type="text"
           [(ngModel)]="logSettings.exludeTerm"
-          (input)="applySearchFilter()"
+          (input)="applySettings()"
         />
         <mat-icon
           matSuffix
@@ -52,8 +52,8 @@
           >info</mat-icon
         >
       </mat-form-field>
-      <mat-checkbox [(ngModel)]="logSettings.settingsGlobal">
-        <span 
+      <mat-checkbox [(ngModel)]="logSettings.settingsGlobal" (change)="applySettings()">
+        <span
           matTooltip="Einstellungen für alle Logs anwenden. Filter werden nicht zurückgesetzt."
           matTooltipPosition="right"
           [matTooltipShowDelay]="500"
@@ -61,6 +61,9 @@
         >
           Einstellungen global anwenden
         </span>
+      </mat-checkbox>
+      <mat-checkbox [(ngModel)]="logSettings.onlyUniqueEntries" (change)="applySettings()">
+        <span class="settings-checkbox-text"> Nur einzigartige Einträge anzeigen </span>
       </mat-checkbox>
     </div>
 

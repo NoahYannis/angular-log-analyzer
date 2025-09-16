@@ -165,7 +165,7 @@ export class App implements AfterViewInit {
     try {
       // Datei in Zeilen aufteilen
       const lines = content.split('\n');
-      const parsedLogs: Entry[] = [];
+      let parsedLogs: Entry[] = [];
 
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i].trim();
@@ -196,6 +196,10 @@ export class App implements AfterViewInit {
 
           parsedLogs.push(logEntry);
         }
+      }
+
+      if (this.logSettings.onlyUniqueEntries) {
+        parsedLogs = this.getUniqueEntries();
       }
 
       // Tabelle aktualisieren
@@ -230,16 +234,6 @@ export class App implements AfterViewInit {
     }
   }
 
-  // Suche und Ausschluss von Begriffen
-  applySearchFilter() {
-    if (this.logEntries.data.length < 1) {
-      return;
-    }
-
-    this.delayedSettingsSave();
-    this.filterEntries();
-  }
-
   applyToggleFilter(event: MatSlideToggleChange) {
     let toggle: string = event.source.id;
     this.logSettings.toggleSettings[toggle] = event.source.checked;
@@ -249,6 +243,10 @@ export class App implements AfterViewInit {
       return;
     }
 
+    this.applySettings();
+  }
+
+  applySettings() {
     this.delayedSettingsSave();
     this.filterEntries();
   }
@@ -256,11 +254,14 @@ export class App implements AfterViewInit {
   private filterEntries() {
     this.isProcessing = true;
 
-    // Asynchron laden
     setTimeout(() => {
-      this.filteredEntries.data = this.logEntries.data.filter((entry) =>
-        this.meetsFilterCriteria(entry)
-      );
+      let filteredData = this.logEntries.data.filter((entry) => this.meetsFilterCriteria(entry));
+
+      if (this.logSettings.onlyUniqueEntries) {
+        filteredData = this.getUniqueEntries();
+      }
+
+      this.filteredEntries.data = filteredData;
 
       if (this.paginator) {
         this.paginator.firstPage();
@@ -307,6 +308,18 @@ export class App implements AfterViewInit {
     this.saveTimeout = setTimeout(() => {
       localStorage.setItem(this.LOG_ANALYZER_SETTINGS_KEY, JSON.stringify(this.logSettings));
     }, 5000);
+  }
+
+  private getUniqueEntries(): Entry[] {
+    const seen = new Set<string>();
+    return this.logEntries.data.filter((entry) => {
+      const key = `${entry.date}_${entry.time}_${entry.level}_${entry.source}_${entry.message}`;
+      if (seen.has(key)) {
+        return false;
+      }
+      seen.add(key);
+      return true;
+    });
   }
 
   onDragOver(event: DragEvent) {
